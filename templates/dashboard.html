@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block block1 %}
+<h3>Control panel</h3>
+<small>welcome <b>{{session['username']}}</b></small>
+<hr>
+
+<a href="/addarticle" class="btn btn-dark">add article</a>
+<br><br>
+{% if articles %}
+    <table class="table table-hover table-dark">
+        <thead>
+            <tr>
+                <th scope="col">id</th>
+                <th scope="col">Title</th>
+                <th scope="col">Author</th>
+                <th scope="col">Published</th>
+                <th scope="col"></th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for article in articles  %}
+            <tr>
+                <th scope="row">{{article[0]['id']}}</th>
+                <td><a href="/article/{{article[0]['id']}}">{{article[0]['title']}}</a></td>
+                <td>{{article[0]['author']}}</td>
+                <td>{{article[0]["date"]}}</td>
+                <td><a href="/edit/{{article[0]['id']}}" class="btn btn-secondary">edit</a></td>
+                <td><a href="/delete/{{article[0]['id']}}" class="btn btn-secondary">delete</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <div class= "alert alert-danger">You don't have any article yet</div>
+
+{% endif %}
+{% endblock  %}
