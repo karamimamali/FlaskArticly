@@ -1,47 +1,10 @@
-from flask import Flask, render_template, flash, redirect, url_for, session, logging, request
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators
+from flask import render_template,flash, redirect, url_for, session, request
 from passlib.hash import sha256_crypt
 from functools import wraps
-from flask_sqlalchemy import SQLAlchemy  
-from datetime import datetime
+from forms import RegisterForm , LogInForm ,ArticleForm
+from main import app, db 
+from models import Articles , Users
 
-
-
-
-
-# app and database configurations
-app = Flask(__name__)
-app.secret_key = "hello"
-
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///./data.db"
-db = SQLAlchemy(app)
-
-#----------------------------------------------------------------------------------------
-# Tables
-
-
-
-class Users(db.Model):
-    __tablename__ = "Users"
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String())
-    email = db.Column(db.String(), unique=True)
-    username = db.Column(db.String(), unique=True)
-    password = db.Column(db.String())
-
-class Articles(db.Model):
-    __tablename__ = "Articles"
-
-    id = db.Column("id",db.Integer, primary_key=True)
-    title = db.Column("title",db.String())
-    author = db.Column("author",db.String())
-    content = db.Column("content",db.String())
-    date = db.Column("date",db.DateTime, default=datetime.utcnow)
-
-
-#----------------------------------------------------------------------------------------
-# Decorator
 
 
 def login_required(f):
@@ -55,35 +18,12 @@ def login_required(f):
     return decorated_function
 
 
-#----------------------------------------------------------------------------------------
-# Forms
 
 
-class RegisterForm(Form):
-    name = StringField("name",render_kw={'style': 'width: 20ch' } ,validators=[validators.length(min=1,max=25)])
-    username = StringField("username",render_kw={'style': 'width: 20ch'}, validators=[validators.length(min=1,max= 25)])
-    email = StringField("email",render_kw={'style': 'width: 20ch'})
-    password = PasswordField("password",render_kw={'style': 'width: 20ch'},validators=[
-        validators.DataRequired(message="Enter a password"),
-        validators.EqualTo(fieldname="confirm", message="passwords doesn't match")
-    ])
-    confirm = PasswordField("confirm your password",render_kw={'style': 'width: 20ch'})
-
-class LogInForm(Form):
-    username = StringField('username')
-    password = PasswordField('password')
-
-class ArticleForm(Form):
-    title = StringField('title',validators=[validators.length(min=5,max=100)])
-    content = TextAreaField('content',validators=[validators.length(min=10)])
-
-
-#----------------------------------------------------------------------------------------
-#functions
 
 
 @app.route('/')
-def home():
+def home():    
     return render_template('index.html')
 
 
@@ -110,8 +50,6 @@ def articles():
     except:
         return render_template('articles.html')
 
-#----------------------------------------------------------------------------------------
-# Log out , log in , register
 
 @app.route('/logout')
 def cix():
@@ -168,6 +106,8 @@ def register():
             return redirect(url_for('register'))
     else:
         return render_template('register.html',form=form)
+
+
 
 
 
@@ -260,9 +200,3 @@ def search():
         
         return render_template('articles.html')
                 
-
-
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True)    
