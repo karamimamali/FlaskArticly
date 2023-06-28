@@ -3,7 +3,8 @@ from passlib.hash import sha256_crypt
 from functools import wraps
 from forms import RegisterForm , LogInForm ,ArticleForm
 from main import app, db 
-from models import Articles , Users
+from models import Article , User , Like,Comment
+from sqlalchemy import func
 
 
 
@@ -23,8 +24,10 @@ def login_required(f):
 
 
 @app.route('/')
-def home():    
-    return render_template('index.html')
+def home():
+            
+    top_articles = db.session.query(Article).join(Like).group_by(Article).order_by(func.count(Like.id).desc()).limit(6).all()  
+    return render_template('index.html',articles=top_articles)
 
 
 @app.route('/about')
@@ -35,18 +38,24 @@ def about():
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    session.pop('page',None)
+    session['page'] = 'dashboard'
     try:
-        result = db.session.execute(db.select(Articles).filter_by(author=session["username"]))              
-        return render_template('dashboard.html',articles=result)
+        user = db.session.execute(db.select(User).filter_by(username=session['username'])).scalar()
+        articles = db.session.execute(db.select(Article).filter_by(author=user.id))              
+        return render_template('dashboard.html',articles=articles,user=user)
     except:
         return render_template('dashboard.html')
 
 
 @app.route('/articles')
 def articles():
+    session.pop('page',None)
+    session['page'] = 'articles'
     try:
-        result = db.session.execute(db.select(Articles))
-        return render_template('articles.html',articles=result)   
+        articles = db.session.execute(db.select(Article)).scalars()
+        user = db.session.execute(db.select(User).filter_by(username=session['username'])).scalar()
+        return render_template('articles.html',articles=articles,user =user)   
     except:
         return render_template('articles.html')
 
@@ -64,7 +73,7 @@ def daxil_ol():
         entered_password = form.password.data
 
         try:
-            user =db.session.execute(db.select(Users).filter_by(username=entered_username)).scalar_one()
+            user =db.session.execute(db.select(User).filter_by(username=entered_username)).scalar_one()
                   
             real_password = user.password 
             if sha256_crypt.verify(entered_password,real_password):
@@ -93,10 +102,10 @@ def register():
         username = form.username.data
         email = form.email.data
         password = sha256_crypt.hash(form.password.data)
-
+        
         try:
-            user = Users(name=name,username=username,email=email,password=password)
-
+            user = User(name=name,email=email,username=username,password=password)
+            
             db.session.add(user)
             db.session.commit()
             flash('sign up succesfully','success')
@@ -118,11 +127,15 @@ def register():
 #detail ,add article , delet article ,update article ,search article
 @app.route('/article/<id>')
 def detail(id):
+    session.pop('page',None)
+    session['page'] = 'article'
     try:
-        result = db.session.execute(db.select(Articles).filter_by(id=id)).scalar_one()       
-        return render_template('article.html',article=result)
+        user = db.session.execute(db.select(User).filter_by(username=session['username'])).scalar()
+        article = db.session.execute(db.select(Article).filter_by(id=id)).scalar_one()       
+        return render_template('article.html',article=article,user=user)
     except:
-        return render_template("article.html")
+        article = db.session.execute(db.select(Article).filter_by(id=id)).scalar_one()
+        return render_template("article.html",article=article)
     
 
 
@@ -130,8 +143,8 @@ def detail(id):
 def addarticle():
     form = ArticleForm(request.form)
     if request.method == 'POST' and form.validate(): 
-        
-        article = Articles(title=form.title.data,content=form.content.data,author=session["username"])
+        user = db.session.execute(db.select(User).filter_by(username=session['username'])).scalar()
+        article = Article(title=form.title.data,content=form.content.data,author=user.id)
         db.session.add(article)
         db.session.commit()
         flash('Article added succesfully','success')
@@ -144,7 +157,8 @@ def addarticle():
 @login_required
 def delete(id):
     try:
-        article = db.session.execute(db.select(Articles).filter_by(id=id,author=session["username"])).scalar_one()       
+        user = db.session.execute(db.select(User).filter_by(username=session['username'])).scalar()
+        article = db.session.execute(db.select(Article).filter_by(id=id,author=user.id)).scalar_one()       
         db.session.delete(article)
         db.session.commit()
 
@@ -159,7 +173,8 @@ def delete(id):
 def update(id):
     if request.method == 'GET':              
         try:
-            article = db.session.execute(db.select(Articles).filter_by(id=id,author=session["username"])).scalar_one()
+            user = db.session.execute(db.select(User).filter_by(username=session['username'])).scalar()
+            article = db.session.execute(db.select(Article).filter_by(id=id,author=user.id)).scalar_one()
             
             form = ArticleForm()
 
@@ -176,8 +191,8 @@ def update(id):
 
         new_title = form.title.data
         new_content = form.content.data
-
-        article = db.session.execute(db.select(Articles).filter_by(id=id)).scalar_one_or_none()
+        
+        article = db.session.execute(db.select(Article).filter_by(id=id)).scalar_one_or_none()
 
         article.title = new_title
         article.content = new_content
@@ -194,9 +209,49 @@ def search():
     else:    
         keyword = request.form.get("keyword")
         search = "%{}%".format(keyword)         
-        articles = Articles.query.filter(Articles.title.like(search))
+        articles = Article.query.filter(Article.title.like(search))
+        user = db.session.execute(db.select(User).filter_by(username=session['username'])).scalar()
         if articles:
-            return render_template('search.html',articles = articles)
+            return render_template('articles.html',articles = articles,user=user)
         
         return render_template('articles.html')
                 
+
+
+@app.route('/like/<string:article_id>')
+@login_required
+def like(article_id):
+    article = db.session.execute(db.select(Article).filter_by(id = article_id)).scalar()
+    user = db.session.execute(db.select(User).filter_by(username = session['username'])).scalar()
+    like = db.session.execute(db.select(Like).filter_by(author = user.id,article_id=article.id)).scalar()
+
+    if not article:
+        flash("there is no article like that",'danger')
+    
+    elif like:
+        db.session.delete(like)
+        db.session.commit()
+
+    else:
+        like = Like(author = user.id, article_id = article.id)
+        db.session.add(like)
+        db.session.commit()
+
+    if session['page'] == 'articles':
+        return redirect(url_for('articles'))
+    
+    elif session['page'] == 'dashboard':
+        return redirect(url_for('dashboard'))
+        
+        
+    else:
+        try:
+            article = db.session.execute(db.select(Article).filter_by(id=article_id)).scalar_one()
+            user = db.session.execute(db.select(User).filter_by(username=session['username'])).scalar()       
+            return render_template('article.html',article=article,user=user)
+        except:
+            return render_template('article.html')
+
+
+
+    

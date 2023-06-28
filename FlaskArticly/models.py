@@ -2,21 +2,50 @@ from main import db
 from datetime import datetime
 
 
-class Users(db.Model):
-    __tablename__ = "Users"
+class User(db.Model):
+    __tablename__ = "user"
+    __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String())
-    email = db.Column(db.String(), unique=True)
-    username = db.Column(db.String(), unique=True)
-    password = db.Column(db.String())
+    name = db.Column(db.String(150))
+    email = db.Column(db.String(150), unique=True)
+    username = db.Column(db.String(150), unique=True)
+    password = db.Column(db.String(150))
+    articles = db.relationship("Article",backref = "user" , passive_deletes = True)
+    comments = db.relationship("Comment",backref = "user" , passive_deletes = True)
+    likes = db.relationship("Like",backref = "user" , passive_deletes = True)
 
-class Articles(db.Model):
-    __tablename__ = "Articles"
+class Article(db.Model):
+    __tablename__ = "article"
+    __table_args__ = {'extend_existing': True}
 
     id = db.Column("id",db.Integer, primary_key=True)
-    title = db.Column("title",db.String())
-    author = db.Column("author",db.String())
+    title = db.Column("title",db.String(150))
+    author = db.Column(db.Integer, db.ForeignKey("user.id",ondelete= "CASCADE"),nullable = False)
     content = db.Column("content",db.String())
     date = db.Column("date",db.DateTime, default=datetime.utcnow)
+    comments = db.relationship("Comment",backref = "article" , passive_deletes = True)
+    likes = db.relationship("Like",backref = "article" , passive_deletes = True)
+    
 
+class Comment(db.Model):
+    __tablename__ = "comment"
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column("id",db.Integer, primary_key=True)
+    title = db.Column("title",db.String(150))
+    author = db.Column(db.Integer, db.ForeignKey("user.id",ondelete= "CASCADE"),nullable = False)
+    article_id = db.Column(db.Integer, db.ForeignKey("article.id",ondelete= "CASCADE"),nullable = False)
+    content = db.Column("content",db.String())
+    date = db.Column("date",db.DateTime, default=datetime.utcnow)
+    
+
+
+class Like(db.Model):
+    __tablename__ = "like"
+    __table_args__ = {'extend_existing': True}
+
+    id = db.Column("id",db.Integer, primary_key=True)
+    author = db.Column(db.Integer, db.ForeignKey("user.id",ondelete= "CASCADE"),nullable = False)
+    article_id = db.Column(db.Integer, db.ForeignKey("article.id",ondelete= "CASCADE"),nullable = False)
+    

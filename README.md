@@ -5,12 +5,15 @@
 * Log in , log out and sign up functionality
 * Updating , deleting and sharing your articles
 * A simple search bar
+* Porfile
+* Like
+* most liked articles section
 
 ## Coming soon
 
 I will add these functionalities
 
-*  like 
+*  profile photo
 *  comment
 *  view
  

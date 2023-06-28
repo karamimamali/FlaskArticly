@@ -6,7 +6,29 @@
     <div class="text text-center">
         <h1>Welcome to Articly</h1>
         <hr>
-        <p>You can share about you interests and hobbies here.</p>
-        
+        <p><b>You can share about you interests and hobbies here.</b></p>
+        <br><br><br>
+        <h4>Most liked articles</h4>
+        <br>
+        <table class="table table-hover table-dark">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Author</th>
+                    <th scope="col">Published</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for article in articles  %}
+                <tr>
+                    <td></td>
+                    <td><a href="/article/{{article['id']}}" class= "btn btn-secondary">{{article['title']}}</a></td>
+                    <td>{{article.user.username}}</td>
+                    <td>{{article["date"].strftime('%d-%m-%Y %H:%M')}}</td>                   
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>      
     </div>
 {% endblock  %}
