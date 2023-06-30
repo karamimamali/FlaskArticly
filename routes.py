@@ -3,7 +3,7 @@ from passlib.hash import sha256_crypt
 from functools import wraps
 from forms import RegisterForm , LogInForm ,ArticleForm
 from main import app, db 
-from models import Article , User , Like,Comment
+from models import Article , User , Like, Comment
 from sqlalchemy import func
 
 
