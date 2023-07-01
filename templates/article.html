@@ -56,6 +56,8 @@
 <hr>
 <div class="hstack gap-3">
     <div class="bg-light border">Comment {{loop.index}}</div>
+    <div class="vr"></div>
+    <div class="bg-light border">{{comment.user.username}} </div>
     <div class="bg-light border  ms-auto">Published : {{comment.date.strftime('%d-%m-%Y %H:%M')}}</div>
 </div> 
 <div>{{comment.content|safe}}</div>

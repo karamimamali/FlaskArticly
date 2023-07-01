@@ -268,7 +268,6 @@ def like(article_id):
 def addcomment(article_id):
     form = CommentForm(request.form)
     user = db.session.execute(db.select(User).filter_by(username=session['username'])).scalar()
-    article = db.session.execute(db.select(Article).filter_by(id=article_id)).scalar_one()
     if request.method == 'POST' and form.validate():  
         comment = Comment(content=form.content.data , author= user.id ,article_id=article_id)
         db.session.add(comment)
