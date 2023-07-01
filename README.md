@@ -1,11 +1,11 @@
 # FlaskArticly
 ## simple wep app with Flask , "Articly"
 
-* You can look for how this code integrating with database.
+* You can look how this code integrating with database.
 * Log in , log out and sign up functionality
 * Updating , deleting and sharing your articles
 * A simple search bar
-* Porfile
+* Profile
 * Like system
 * Comment system
 * Most liked articles section
