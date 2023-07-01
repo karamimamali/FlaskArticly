@@ -25,14 +25,14 @@
             {% for article in articles  %}
             <tr>
                 <td></td>
-                <td><a href="/article/{{article['id']}}" class= "btn btn-secondary">{{article['title']}}</a></td>
+                <td><a href="/article/{{article.id}}" class= "btn btn-secondary">{{article.title}}</a></td>
                 <td>{{article.user.username}}</td>
-                <td>{{article["date"].strftime('%d-%m-%Y %H:%M')}}</td>
+                <td>{{article.date.strftime('%d-%m-%Y %H:%M')}}</td>
                 
                 {% if user.id in article.likes|map(attribute ='author')|list %}
-                    <td><a href="/like/{{article['id']}}" class="btn btn-danger"><i class="fa-solid fa-heart"></i><small>        {{article.likes|length}}</small> </a></td>
+                    <td><a href="/like/{{article.id}}" class="btn btn-danger"><i class="fa-solid fa-heart"></i><small>        {{article.likes|length}}</small> </a></td>
                 {% else %}
-                    <td><a href="/like/{{article['id']}}" class="btn btn-danger"><i class="fa-regular fa-heart"></i><small>        {{article.likes|length}}</small> </a></td>
+                    <td><a href="/like/{{article.id}}" class="btn btn-danger"><i class="fa-regular fa-heart"></i><small>        {{article.likes|length}}</small> </a></td>
                 {% endif %}
                 
                 

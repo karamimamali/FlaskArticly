@@ -6,16 +6,17 @@
 * Updating , deleting and sharing your articles
 * A simple search bar
 * Porfile
-* Like
-* most liked articles section
+* Like system
+* Comment system
+* Most liked articles section
 
 ## Coming soon
 
 I will add these functionalities
 
-*  profile photo
-*  comment
-*  view
+*  Profile photo
+*  View
+*  Deleting comments
  
  ## How to install this app
 

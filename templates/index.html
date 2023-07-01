@@ -23,9 +23,9 @@
                 {% for article in articles  %}
                 <tr>
                     <td></td>
-                    <td><a href="/article/{{article['id']}}" class= "btn btn-secondary">{{article['title']}}</a></td>
+                    <td><a href="/article/{{article.id}}" class= "btn btn-secondary">{{article.title}}</a></td>
                     <td>{{article.user.username}}</td>
-                    <td>{{article["date"].strftime('%d-%m-%Y %H:%M')}}</td>                   
+                    <td>{{article.date.strftime('%d-%m-%Y %H:%M')}}</td>                   
                 </tr>
                 {% endfor %}
             </tbody>

@@ -1,7 +1,7 @@
 from flask import render_template,flash, redirect, url_for, session, request
 from passlib.hash import sha256_crypt
 from functools import wraps
-from forms import RegisterForm , LogInForm ,ArticleForm
+from forms import RegisterForm , LogInForm ,ArticleForm ,CommentForm
 from main import app, db 
 from models import Article , User , Like, Comment
 from sqlalchemy import func
@@ -20,14 +20,11 @@ def login_required(f):
 
 
 
-
-
-
 @app.route('/')
 def home():
-            
     top_articles = db.session.query(Article).join(Like).group_by(Article).order_by(func.count(Like.id).desc()).limit(6).all()  
     return render_template('index.html',articles=top_articles)
+
 
 
 @app.route('/about')
@@ -35,35 +32,44 @@ def about():
     return render_template('about.html')
 
 
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
     session.pop('page',None)
     session['page'] = 'dashboard'
+    
     try:
         user = db.session.execute(db.select(User).filter_by(username=session['username'])).scalar()
-        articles = db.session.execute(db.select(Article).filter_by(author=user.id))              
+        articles = db.session.query(Article).filter_by(author=user.id).all()      
         return render_template('dashboard.html',articles=articles,user=user)
+    
     except:
         return render_template('dashboard.html')
+
 
 
 @app.route('/articles')
 def articles():
     session.pop('page',None)
     session['page'] = 'articles'
+
     try:
-        articles = db.session.execute(db.select(Article)).scalars()
+        articles = db.session.query(Article).all()
         user = db.session.execute(db.select(User).filter_by(username=session['username'])).scalar()
         return render_template('articles.html',articles=articles,user =user)   
+    
     except:
         return render_template('articles.html')
+
 
 
 @app.route('/logout')
 def cix():
     session.clear()
     return redirect(url_for('home'))
+
+
 
 @app.route('/login', methods= ['GET','POST'])
 def daxil_ol():
@@ -74,13 +80,14 @@ def daxil_ol():
 
         try:
             user =db.session.execute(db.select(User).filter_by(username=entered_username)).scalar_one()
-                  
             real_password = user.password 
+
             if sha256_crypt.verify(entered_password,real_password):
                 flash('loged in','success')
                 session['logged_in'] = True
                 session['username'] = entered_username
                 return redirect(url_for('home'))
+            
             else:
                 flash('password is wrong','danger')
                 return redirect(url_for('daxil_ol'))
@@ -91,7 +98,8 @@ def daxil_ol():
 
     else:
         return render_template('login.html',form=form)
-    
+
+
 
 @app.route('/register', methods = ['GET','POST'])
 def register():
@@ -110,38 +118,37 @@ def register():
             db.session.commit()
             flash('sign up succesfully','success')
             return redirect(url_for('daxil_ol'))
+        
         except:
             flash('username is not available','danger')
             return redirect(url_for('register'))
+        
     else:
         return render_template('register.html',form=form)
 
 
 
-
-
-
-
-
-#----------------------------------------------------------------------------------------
-#detail ,add article , delet article ,update article ,search article
 @app.route('/article/<id>')
 def detail(id):
     session.pop('page',None)
     session['page'] = 'article'
+    form = CommentForm(request.form)
+
     try:
         user = db.session.execute(db.select(User).filter_by(username=session['username'])).scalar()
         article = db.session.execute(db.select(Article).filter_by(id=id)).scalar_one()       
-        return render_template('article.html',article=article,user=user)
+        return render_template('article.html',article=article,user=user,form=form)
+    
     except:
         article = db.session.execute(db.select(Article).filter_by(id=id)).scalar_one()
-        return render_template("article.html",article=article)
-    
+        return render_template("article.html",article=article,form=form)
+   
 
 
 @app.route('/addarticle', methods=['GET','POST'])
 def addarticle():
     form = ArticleForm(request.form)
+
     if request.method == 'POST' and form.validate(): 
         user = db.session.execute(db.select(User).filter_by(username=session['username'])).scalar()
         article = Article(title=form.title.data,content=form.content.data,author=user.id)
@@ -149,8 +156,10 @@ def addarticle():
         db.session.commit()
         flash('Article added succesfully','success')
         return redirect(url_for('dashboard'))
+    
     else:
         return render_template('addarticle.html',form = form)
+
 
 
 @app.route('/delete/<string:id>')
@@ -164,14 +173,17 @@ def delete(id):
 
         flash('article deleted','warning')
         return redirect(url_for('dashboard'))
+    
     except:
         flash("there is no such article or you do not have permission to delete this article",'danger')
         return redirect(url_for('home'))
 
+
+
 @app.route('/edit/<string:id>', methods=['GET','POST'])
 @login_required
 def update(id):
-    if request.method == 'GET':              
+    if request.method == 'GET': 
         try:
             user = db.session.execute(db.select(User).filter_by(username=session['username'])).scalar()
             article = db.session.execute(db.select(Article).filter_by(id=id,author=user.id)).scalar_one()
@@ -202,18 +214,20 @@ def update(id):
         return redirect(url_for('dashboard'))
 
 
+
 @app.route('/search', methods= ['GET','POST'])
 def search():
     if request.method == 'GET':
         return redirect(url_for('home'))
+    
     else:    
         keyword = request.form.get("keyword")
         search = "%{}%".format(keyword)         
         articles = Article.query.filter(Article.title.like(search))
         user = db.session.execute(db.select(User).filter_by(username=session['username'])).scalar()
+
         if articles:
             return render_template('articles.html',articles = articles,user=user)
-        
         return render_template('articles.html')
                 
 
@@ -237,21 +251,32 @@ def like(article_id):
         db.session.add(like)
         db.session.commit()
 
+
     if session['page'] == 'articles':
         return redirect(url_for('articles'))
     
     elif session['page'] == 'dashboard':
         return redirect(url_for('dashboard'))
         
-        
     else:
-        try:
-            article = db.session.execute(db.select(Article).filter_by(id=article_id)).scalar_one()
-            user = db.session.execute(db.select(User).filter_by(username=session['username'])).scalar()       
-            return render_template('article.html',article=article,user=user)
-        except:
-            return render_template('article.html')
+        return redirect(url_for('detail',id=article_id))
 
 
 
-    
+@app.route('/addcomment/<article_id>',methods=['POST','GET'])
+@login_required
+def addcomment(article_id):
+    form = CommentForm(request.form)
+    user = db.session.execute(db.select(User).filter_by(username=session['username'])).scalar()
+    article = db.session.execute(db.select(Article).filter_by(id=article_id)).scalar_one()
+    if request.method == 'POST' and form.validate():  
+        comment = Comment(content=form.content.data , author= user.id ,article_id=article_id)
+        db.session.add(comment)
+        db.session.commit()
+        flash('Comment added succesfully','success')
+        return redirect(url_for('detail',id=article_id))
+    else:
+        return render_template('addcomment.html',form = form)
+
+
+

@@ -2,12 +2,13 @@
 
 {% block block1 %}
 <h3>Control panel</h3>
-<small>welcome <b>{{session['username']}}</b></small>
+<small>welcome <b>{{session.username}}</b></small>
 <hr>
 
 <a href="/addarticle" class="btn btn-primary">Add <i class="fa-solid fa-plus"></i></a>
 <br><br>
 {% if articles %}
+    
     <table class="table table-hover table-dark">
         <thead>
             <tr>
@@ -24,16 +25,16 @@
             {% for article in articles  %}
             
             <tr>
-                <th scope="row">{{article[0]['id']}}</th>
-                <td><a href="/article/{{article[0]['id']}}" class= "btn btn-secondary">{{article[0]['title']}}</a></td>
-                <td>{{article[0].user.username}}</td>
-                <td>{{article[0]["date"].strftime('%d-%m-%Y %H:%M')}}</td>
-                <td><a href="/edit/{{article[0]['id']}}" class="btn btn-secondary">edit</a></td>
-                <td><a href="/delete/{{article[0]['id']}}" class="btn btn-secondary">delete</a></td>
-                {% if user.id in article[0].likes|map(attribute ='author')|list %}
-                    <td><a href="/like/{{article[0]['id']}}" class="btn btn-danger"><i class="fa-solid fa-heart"></i><small>        {{article[0].likes|length}}</small> </a></td>
+                <th scope="row">{{loop.index}}</th>
+                <td><a href="/article/{{article.id}}" class= "btn btn-secondary">{{article.title}}</a></td>
+                <td>{{article.user.username}}</td>
+                <td>{{article.date.strftime('%d-%m-%Y %H:%M')}}</td>
+                <td><a href="/edit/{{article.id}}" class="btn btn-secondary">edit</a></td>
+                <td><a href="/delete/{{article.id}}" class="btn btn-secondary">delete</a></td>
+                {% if user.id in article.likes|map(attribute ='author')|list %}
+                    <td><a href="/like/{{article.id}}" class="btn btn-danger"><i class="fa-solid fa-heart"></i><small>        {{article.likes|length}}</small> </a></td>
                 {% else %}
-                    <td><a href="/like/{{article[0]['id']}}" class="btn btn-danger"><i class="fa-regular fa-heart"></i><small>        {{article[0].likes|length}}</small> </a></td>
+                    <td><a href="/like/{{article.id}}" class="btn btn-danger"><i class="fa-regular fa-heart"></i><small>        {{article.likes|length}}</small> </a></td>
                 {% endif %}
             </tr>
             {% endfor %}
