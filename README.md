@@ -1,4 +1,7 @@
 # FlaskArticly
+## warning!!!
+Some parts of web-site could not work because of the changing in some modules. I don't update this repository so often so you might want to change some parts of it :)
+
 ## simple wep app with Flask , "Articly"
 
 * You can look how this code integrating with database.
@@ -10,9 +13,9 @@
 * Comment system
 * Most liked articles section
 
-## Coming soon
+## What we can do else?
 
-I will add these functionalities
+You can add these functionalities
 
 *  Profile photo
 *  View
