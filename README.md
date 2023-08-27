@@ -1,19 +1,18 @@
 # FlaskArticly
-## warning!!!
-Some parts of web-site could not work because of the changing in some modules. I don't update this repository so often so you might want to change some parts of it :)
+
 
 ## simple wep app with Flask , "Articly"
 
-* You can look how this code integrating with database.
 * Log in , log out and sign up functionality
-* Updating , deleting and sharing your articles
-* A simple search bar
-* Profile
+* Updating , deleting and posting your articles
+* A simple search bar, database query by keyword
+* Profile(Dashboard)
 * Like system
 * Comment system
-* Most liked articles section
+* Most liked articles section 
+* And more that that
 
-## What we can do else?
+## What can be added...
 
 You can add these functionalities
 
@@ -25,5 +24,5 @@ You can add these functionalities
 
  * Simply clone this project by - `git clone https://github.com/karamimamali/FlaskArticly.git`
  * Go to main directory - `cd FlaskArticly`
- * Run - `pyhton main.py` or `py main.py`
+ * Run - `pyhton run.py` or `py run.py`
  

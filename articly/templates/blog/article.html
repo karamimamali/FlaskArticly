@@ -2,55 +2,38 @@
 
 
 {% block block1 %}
-{% if user %}
-    {% if article %}
-        <h4>{{article.title}}</h4>
-        <hr>
-        <div class="hstack gap-3">
-            <div class="bg-light border">Author : {{article.user.username}}</div>
-            <div class="bg-light border ms-auto">Published : {{article.date.strftime('%d-%m-%Y %H:%M')}}</div>
+{% if article %}
+    <h4>{{article.title}}</h4>
+    <hr>
+    <div class="hstack gap-3">
+        <div class="bg-light border">Author : {{article.user.username}}</div>
+        <div class="bg-light border ms-auto">Published : {{article.date.strftime('%d-%m-%Y %H:%M')}}</div>
+        {% if user %}
             <div class="vr"></div>
             {% if user.id in article.likes|map(attribute ='author')|list %}
                 <td><a href="/like/{{article.id}}" class="btn btn-danger"><i class="fa-solid fa-heart"></i><small>        {{article.likes|length}}</small> </a></td>
             {% else %}
                 <td><a href="/like/{{article.id}}" class="btn btn-danger"><i class="fa-regular fa-heart"></i><small>        {{article.likes|length}}</small> </a></td>
             {% endif %}
-        </div>          
-        <hr>
-        {{article.content|safe}}
-    {% else %}
-        <div class= "alert alert-warning">Article not found</div>
-
-    {% endif %}
+        {% endif %}
+    </div>          
+    <hr>
+    {{article.content|safe}}
 {% else %}
-    {% if article %}
-        <h4>{{article.title}}</h4>
-        <hr>
-        <div class="hstack gap-3">
-            <div class="bg-light border">Author : {{articleuser.username}}</div>
-            <div class="bg-light border ms-auto">Published : {{article.date.strftime('%d-%m-%Y %H:%M')}}</div>            
-        </div>          
-        <hr>
-        {{article.content|safe}}
-    {% else %}
-        <div class= "alert alert-warning">Article not found</div>
-
-    {% endif %}
-
+    <div class= "alert alert-warning">Article not found</div>
 {% endif %}
+
  <br><br>
 
-
-
-
 <hr>
-<div class="hstack gap-3">
+<div class="hstack gap-3 ">
     <div class="bg-light border">Comments: {{article.comments|length}}</div>
     <div class="vr"></div>
     <div class="vr ms-auto"></div>
     <a href="/addcomment/{{article.id}}" class="btn btn-primary">Add <i class="fa-solid fa-plus"></i></a>
 </div>
 
+<br>
 
 {% for comment in article.comments %}
 <hr>
